@@ -7,11 +7,15 @@ import me.leeseungjun.dto.ArticleListViewResponse;
 import me.leeseungjun.dto.ArticleResponse;
 import me.leeseungjun.dto.ArticleViewResponse;
 import me.leeseungjun.service.BlogService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+
 
 import java.util.List;
 
@@ -20,15 +24,15 @@ import java.util.List;
 public class BlogViewController {
     private final BlogService blogService;
 
-    //전체 게시글 목록
+    //전체 게시글 목록(페이징 기능 추가)
     @GetMapping("/articles")
-    public String getArticles(Model model) {
-        List<ArticleListViewResponse> articles = blogService.findAll().stream()
-                .map(ArticleListViewResponse::new)
-                .toList();
-        model.addAttribute("articles", articles);
+    public String getArticles(Model model, @RequestParam(value="page", defaultValue="0") int page) { //기본 페이지 값을 0으로 추가
+
+        Page<Article> paging = this.blogService.getList(page);
+        model.addAttribute("paging", paging);
 
         return "articleList";
+
     }
 
     //게시글
@@ -50,7 +54,7 @@ public class BlogViewController {
             Article article = blogService.findById(id);
             model.addAttribute("article", new ArticleViewResponse(article));
         }
-            return "newArticle";
+        return "newArticle";
 
     }
 }
